@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>騰落レシオ通知</title>
+
+  <!-- アイコン関連 Favicon Generatorで作成 -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+  <link rel="manifest" href="/icons/site.webmanifest">
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+  <!-- Firebase -->
+  <script src="/__/firebase/7.14.5/firebase-app.js"></script>
+  <script src="/__/firebase/7.14.5/firebase-auth.js"></script>
+  <script src="/__/firebase/7.14.5/firebase-firestore.js"></script>
+  <script src="/__/firebase/7.14.5/firebase-analytics.js"></script>
+  <script src="/__/firebase/init.js"></script>
+
+  <!-- FirebaseUI -->
+  <script src="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth__ja.js"></script>
+  <link type="text/css" rel="stylesheet" href="https://www.gstatic.com/firebasejs/ui/4.5.0/firebase-ui-auth.css" />
+
+  <script type="text/javascript">
+    initApp = function () {
+      firebase.auth().onAuthStateChanged((user) => {
+        // firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+          // ログインしている場合
+          console.log('User is signed in.');
+
+          var firestore = firebase.firestore();
+          document.getElementById('userDisplayName').textContent = user.displayName;
+          document.getElementById('userId').textContent = user.email;
+          document.getElementById('userPhoto').src = user.photoURL;
+          // document.getElementById('lastSignInDate').textContent = new Date(firebase.auth().currentUser.metadata.lastSignInTime).toLocaleString().slice(0,-3);
+
+          var upperNotifyFlg = document.getElementById('upperNotifyFlg');
+          var upperValue = document.getElementById('upperValue');
+          var lowerNotifyFlg = document.getElementById('lowerNotifyFlg');
+          var lowerValue = document.getElementById('lowerValue');
+          var updateDate = document.getElementById('updateDate');
+
+          const docRef = firestore.collection('userSettings').doc(user.email);
+          docRef.get().then((doc) => {
+            if (doc.exists) {
+              // 通知設定が済みのユーザー
+              const fields = doc.data();
+              upperNotifyFlg.checked = fields.upperNotifyFlg;
+              upperValue.value = fields.upperValue;
+              lowerNotifyFlg.checked = fields.lowerNotifyFlg;
+              lowerValue.value = fields.lowerValue;
+              updateDate.textContent = fields.updateDate.toDate().toLocaleString().slice(0, -3);
+            } else {
+              // 通知設定がまだのユーザー
+              upperNotifyFlg.checked = true;
+              upperValue.value = 130;
+              lowerNotifyFlg.checked = true;
+              lowerValue.value = 70;
+
+              setUserSettingsToFS();
+            }
+          });
+
+          let setting = document.querySelectorAll('#upperNotifyFlg, #upperValue, #lowerNotifyFlg, #lowerValue');
+          for (let i = 0; i < setting.length; i++) {
+            setting[i].addEventListener(
+              'change',
+              function () {
+                setUserSettingsToFS();
+              }
+            );
+          }
+
+          function setUserSettingsToFS() {
+            const now = new Date();
+            docRef.set({
+              upperNotifyFlg: upperNotifyFlg.checked,
+              upperValue: upperValue.value,
+              lowerNotifyFlg: lowerNotifyFlg.checked,
+              lowerValue: lowerValue.value,
+              updateDate: now
+            }).then(function () {
+              updateDate.textContent = now.toLocaleString().slice(0, -3);
+            });
+          };
+
+          document.getElementById('signOut').addEventListener(
+            'click',
+            function () {
+              console.log('signOut');
+              firebase.auth().signOut();
+            }
+          );
+
+          document.getElementById('deleteAccount').addEventListener(
+            'click',
+            function () {
+              if (confirm('アカウントを削除します。今後通知されなくなりますがよろしいですか？')) {
+                console.log('deleteAccount');
+                // Firestoreのデータをユーザーよりも先に削除
+                docRef.delete();
+
+                firebase.auth().currentUser.delete().then(() => {
+                  console.log('Account delete OK');
+                }).catch((error) => {
+                  console.error("Account delete error: ", error);
+                  // FirebaseUIのDemoを参考にしてエラー対応
+                  if (error.code == 'auth/requires-recent-login') {
+                    // The user's credential is too old. She needs to sign in again.
+                    firebase.auth().signOut().then(function () {
+                      // The timeout allows the message to be displayed after the UI has changed to the signed out state.
+                      setTimeout(function () {
+                        alert('アカウント削除のために再度ログインしてください');
+                      }, 1);
+                    });
+                  }
+                });
+              };
+            }
+          );
+
+          // 最後に画面項目を非表示→表示にする
+          showAfterLogin();
+
+        } else {
+          // ログインしていない場合
+          console.log('User is signed out.');
+          location.href = 'login.html';
+        }
+      }, function (error) {
+        console.error(error);
+      });
+    };
+
+    window.addEventListener('load', function () {
+      initApp();
+    });
+
+    function showAfterLogin() {
+      document.getElementById('menu').className = 'block';
+      document.getElementById('userSettings').className = 'block';
+    };
+  </script>
+
+  <link type="text/css" rel="stylesheet" href="site.css">
+</head>
+
+<body>
+  <nav class="navbar sticky-top navbar-dark bg-primary mb-2">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="lp.html"><img src="icons/favicon.ico" id="navbarImg"> 騰落レシオ通知</a>
+      <div class="dropdown none" id="menu">
+        <!-- <button class="btn dropdown-toggle" type="button" id="dropdownMenu" data-bs-toggle="dropdown" aria-expanded="false"> -->
+        <button class="btn" type="button" id="dropdownMenu" data-bs-toggle="dropdown" aria-expanded="false">
+
+          <!-- <button class="btn" type="button" id="dropdownMenu" data-bs-toggle="dropdown" aria-expanded="false"> -->
+          <!-- <img class="rounded-circle" id="userPhoto"></img> -->
+          <!-- <i class="bi bi-person"></i><span class="navbar-toggler-icon"></span> -->
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenu">
+          <li>
+            <table>
+              <tr>
+                <td rowspan="3"><img class="rounded-circle" id="userPhoto"></img></td>
+                <td><span id="userDisplayName"></span></td>
+              </tr>
+              <tr>
+                <td><span id="userId"></span></td>
+              </tr>
+              <!-- <tr>
+                  <td>前回ログイン: <span id="lastSignInDate"></span></td>
+                </tr> -->
+            </table>
+          </li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <!-- <h6 class="dropdown-header">Dropdown header</h6> -->
+          <!-- <li><a class="dropdown-item" href="lp.html"><i class="bi bi-house-door"></i> Home</a></li> -->
+          <li><button class="dropdown-item" id="signOut"><i class="bi bi-box-arrow-right"></i> ログアウト</button></li>
+          <li>
+            <hr class="dropdown-divider">
+          </li>
+          <li><button class="dropdown-item" id="deleteAccount"><i class="bi bi-person-x"></i> アカウント削除</button></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container-fluid">
+      <div id="userSettings" class="none">
+        <div class="card">
+          <h5 class="card-header bg-secondary">通知設定</h5>
+          <div class="card-body">
+            <p>現在の通知条件は以下の通りです。適宜変更してください。</p>
+            <div class="row align-items-center justify-content-evenly mb-2">
+              <div class="col-6">
+                <div class="form-check form-switch">
+                  <input type="checkbox" class="form-check-input" id="upperNotifyFlg">
+                  <label class="form-check-label" for="upperNotifyFlg">上限値で通知する</label>
+                </div>
+              </div>
+              <div class="col-4">
+                <select class="form-select" id="upperValue" required>
+                  <option>140</option>
+                  <option>135</option>
+                  <option>130</option>
+                  <option>125</option>
+                  <option>120</option>
+                  <option>115</option>
+                  <option>110</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row align-items-center justify-content-evenly mb-2">
+              <div class="col-6">
+                <div class="form-check form-switch">
+                  <input type="checkbox" class="form-check-input" id="lowerNotifyFlg">
+                  <label class="form-check-label" for="lowerNotifyFlg">下限値で通知する</label>
+                </div>
+              </div>
+              <div class="col-4">
+                <select class="form-select" id="lowerValue" required>
+                  <option>90</option>
+                  <option>85</option>
+                  <option>80</option>
+                  <option>75</option>
+                  <option>70</option>
+                  <option>65</option>
+                  <option>60</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="card-footer text-muted text-end">
+            <span id="updateDate"></span>更新
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="site.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+</body>
+
+</html>

@@ -1,0 +1,51 @@
+body {
+  background-color: #edf2f7;
+}
+
+.container-fluid {
+  max-width: 768px;
+}
+
+#navbarImg {
+  height: 30px;
+  border: solid #edf2f7;
+  border-radius: 5px;
+}
+
+#userPhoto {
+  height: 40px;
+}
+
+.none {
+  /* visibility: hidden; */
+  display: none;
+}
+
+.block {
+  /* visibility: hidden; */
+  display: block;
+}
+
+.bg-primary{
+  /* background-color: #CFE2FF!important; */
+  /* background-color: #084298!important; */
+  /* background-color: #063a89!important; */
+  /* background-color: #061e34!important; */
+  background-color: #142a43!important;
+  /* background-color: #263b52!important; */
+  /* color: #ffffff!important; */
+  /* background-color: #1A73E8!important; */
+  /* background-color: #0A58CA!important; */
+}
+
+.bg-secondary{
+  background-color: #ffcb2b!important;
+  /* background-color: #CFE2FF!important; */
+  /* background-color: #084298!important;
+  background-color: #0A58CA!important; */
+}
+
+.form-check-input:checked {
+  background-color: #142a43;
+  border-color: #142a43;
+}
