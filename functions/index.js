@@ -135,6 +135,7 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['M
                 + '下限値: ' + lowerValue + '%\n'
                 + '\n'
                 + '〜 騰落レシオ通知 〜\n'
+                + '通知設定の変更、通知メールの配信停止等はこちらから\n'
                 + 'https://updownratio.web.app/\n'
                 + '';
             }
