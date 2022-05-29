@@ -48,7 +48,7 @@
           document.getElementById('userPhoto').src = user.photoURL;
           // document.getElementById('lastSignInDate').textContent = new Date(firebase.auth().currentUser.metadata.lastSignInTime).toLocaleString().slice(0,-3);
           // 通知設定を表示
-          showUserSettings(user.uid);
+          showUserSettings(user);
           // 最後に画面項目を非表示→表示にする
           showAfterLogin();
         } else {
@@ -65,13 +65,13 @@
       initApp();
     });
 
-    function showUserSettings(uid) {
+    function showUserSettings(user) {
       const upperNotifyFlg = document.getElementById('upperNotifyFlg');
       const upperValue = document.getElementById('upperValue');
       const lowerNotifyFlg = document.getElementById('lowerNotifyFlg');
       const lowerValue = document.getElementById('lowerValue');
 
-      firebase.firestore().collection('userSettings').doc(uid).get().then((doc) => {
+      firebase.firestore().collection('userSettings').doc(user.uid).get().then((doc) => {
         if (doc.exists) {
           // 通知設定が済みのユーザー
           const fields = doc.data();
@@ -79,32 +79,33 @@
           upperValue.value = fields.upperValue;
           lowerNotifyFlg.checked = fields.lowerNotifyFlg;
           lowerValue.value = fields.lowerValue;
-          showUpdateDate(uid);
+          showUpdateDate(user);
         } else {
           // 通知設定がまだのユーザー
           upperNotifyFlg.checked = true;
           upperValue.value = 130;
           lowerNotifyFlg.checked = true;
           lowerValue.value = 70;
-          saveUserSettingsToFS(uid);
+          saveUserSettingsToFS(user);
         }
       });
     }
 
-    function saveUserSettingsToFS(uid) {
-      firebase.firestore().collection('userSettings').doc(uid).set({
+    function saveUserSettingsToFS(user) {
+      firebase.firestore().collection('userSettings').doc(user.uid).set({
+        email: user.email,
         upperNotifyFlg: upperNotifyFlg.checked,
         upperValue: upperValue.value,
         lowerNotifyFlg: lowerNotifyFlg.checked,
         lowerValue: lowerValue.value,
         updateDate: firebase.firestore.FieldValue.serverTimestamp()
       }).then(function () {
-        showUpdateDate(uid);
+        showUpdateDate(user);
       });
     };
 
-    function showUpdateDate(uid) {
-      firebase.firestore().collection('userSettings').doc(uid).get().then((doc) => {
+    function showUpdateDate(user) {
+      firebase.firestore().collection('userSettings').doc(user.uid).get().then((doc) => {
         document.getElementById('updateDate').textContent = doc.data().updateDate.toDate().toLocaleString().slice(0, -3);
       });
     }
@@ -221,7 +222,7 @@
       setting[i].addEventListener(
         'change',
         function () {
-          saveUserSettingsToFS(firebase.auth().currentUser.uid);
+          saveUserSettingsToFS(firebase.auth().currentUser);
         }
       );
     }
