@@ -97,7 +97,7 @@
         upperValue: upperValue.value,
         lowerNotifyFlg: lowerNotifyFlg.checked,
         lowerValue: lowerValue.value,
-        updateDate: new Date()
+        updateDate: firebase.firestore.FieldValue.serverTimestamp()
       }).then(function () {
         showUpdateDate(uid);
       });
