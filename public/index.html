@@ -39,105 +39,18 @@
   <script type="text/javascript">
     initApp = function () {
       firebase.auth().onAuthStateChanged((user) => {
-        // firebase.auth().onAuthStateChanged((user) => {
         if (user) {
           // ログインしている場合
           console.log('User is signed in.');
-
-          var firestore = firebase.firestore();
+          // ユーザー情報を表示
           document.getElementById('userDisplayName').textContent = user.displayName;
           document.getElementById('userId').textContent = user.email;
           document.getElementById('userPhoto').src = user.photoURL;
           // document.getElementById('lastSignInDate').textContent = new Date(firebase.auth().currentUser.metadata.lastSignInTime).toLocaleString().slice(0,-3);
-
-          var upperNotifyFlg = document.getElementById('upperNotifyFlg');
-          var upperValue = document.getElementById('upperValue');
-          var lowerNotifyFlg = document.getElementById('lowerNotifyFlg');
-          var lowerValue = document.getElementById('lowerValue');
-          var updateDate = document.getElementById('updateDate');
-
-          const docRef = firestore.collection('userSettings').doc(user.email);
-          docRef.get().then((doc) => {
-            if (doc.exists) {
-              // 通知設定が済みのユーザー
-              const fields = doc.data();
-              upperNotifyFlg.checked = fields.upperNotifyFlg;
-              upperValue.value = fields.upperValue;
-              lowerNotifyFlg.checked = fields.lowerNotifyFlg;
-              lowerValue.value = fields.lowerValue;
-              updateDate.textContent = fields.updateDate.toDate().toLocaleString().slice(0, -3);
-            } else {
-              // 通知設定がまだのユーザー
-              upperNotifyFlg.checked = true;
-              upperValue.value = 130;
-              lowerNotifyFlg.checked = true;
-              lowerValue.value = 70;
-
-              setUserSettingsToFS();
-            }
-          });
-
-          let setting = document.querySelectorAll('#upperNotifyFlg, #upperValue, #lowerNotifyFlg, #lowerValue');
-          for (let i = 0; i < setting.length; i++) {
-            setting[i].addEventListener(
-              'change',
-              function () {
-                setUserSettingsToFS();
-              }
-            );
-          }
-
-          function setUserSettingsToFS() {
-            const now = new Date();
-            docRef.set({
-              upperNotifyFlg: upperNotifyFlg.checked,
-              upperValue: upperValue.value,
-              lowerNotifyFlg: lowerNotifyFlg.checked,
-              lowerValue: lowerValue.value,
-              updateDate: now
-            }).then(function () {
-              updateDate.textContent = now.toLocaleString().slice(0, -3);
-            });
-          };
-
-          document.getElementById('signOut').addEventListener(
-            'click',
-            function () {
-              console.log('signOut');
-              firebase.auth().signOut();
-            }
-          );
-
-          document.getElementById('deleteAccount').addEventListener(
-            'click',
-            function () {
-              if (confirm('アカウントを削除します。今後通知されなくなりますがよろしいですか？')) {
-                console.log('deleteAccount');
-                // Firestoreのデータをユーザーよりも先に削除
-                docRef.delete();
-
-                firebase.auth().currentUser.delete().then(() => {
-                  console.log('Account delete OK');
-                }).catch((error) => {
-                  console.error("Account delete error: ", error);
-                  // FirebaseUIのDemoを参考にしてエラー対応
-                  if (error.code == 'auth/requires-recent-login') {
-                    // The user's credential is too old. She needs to sign in again.
-                    firebase.auth().signOut().then(function () {
-                      // The timeout allows the message to be displayed after the UI has changed to the signed out state.
-                      setTimeout(function () {
-                        alert('アカウント削除のために再度ログインしてください');
-                      }, 1);
-                    });
-                  }
-                });
-              };
-            }
-          );
-
+          // 通知設定を表示
+          showUserSettings();
           // 最後に画面項目を非表示→表示にする
           showAfterLogin();
-
         } else {
           // ログインしていない場合
           console.log('User is signed out.');
@@ -151,6 +64,53 @@
     window.addEventListener('load', function () {
       initApp();
     });
+
+    function showUserSettings() {
+      const upperNotifyFlg = document.getElementById('upperNotifyFlg');
+      const upperValue = document.getElementById('upperValue');
+      const lowerNotifyFlg = document.getElementById('lowerNotifyFlg');
+      const lowerValue = document.getElementById('lowerValue');
+
+      const docRef = firebase.firestore().collection('userSettings').doc(document.getElementById('userId').textContent);
+      docRef.get().then((doc) => {
+        if (doc.exists) {
+          // 通知設定が済みのユーザー
+          const fields = doc.data();
+          upperNotifyFlg.checked = fields.upperNotifyFlg;
+          upperValue.value = fields.upperValue;
+          lowerNotifyFlg.checked = fields.lowerNotifyFlg;
+          lowerValue.value = fields.lowerValue;
+          showUpdateDate();
+        } else {
+          // 通知設定がまだのユーザー
+          upperNotifyFlg.checked = true;
+          upperValue.value = 130;
+          lowerNotifyFlg.checked = true;
+          lowerValue.value = 70;
+          saveUserSettingsToFS();
+        }
+      });
+    }
+
+    function saveUserSettingsToFS() {
+      const docRef = firebase.firestore().collection('userSettings').doc(document.getElementById('userId').textContent);
+      docRef.set({
+        upperNotifyFlg: upperNotifyFlg.checked,
+        upperValue: upperValue.value,
+        lowerNotifyFlg: lowerNotifyFlg.checked,
+        lowerValue: lowerValue.value,
+        updateDate: new Date()
+      }).then(function () {
+        showUpdateDate();
+      });
+    };
+
+    function showUpdateDate() {
+      const docRef = firebase.firestore().collection('userSettings').doc(document.getElementById('userId').textContent);
+      docRef.get().then((doc) => {
+        document.getElementById('updateDate').textContent = doc.data().updateDate.toDate().toLocaleString().slice(0, -3);
+      });
+    }
 
     function showAfterLogin() {
       document.getElementById('menu').className = 'block';
@@ -258,6 +218,52 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
     crossorigin="anonymous"></script>
+  <script>
+    let setting = document.querySelectorAll('#upperNotifyFlg, #upperValue, #lowerNotifyFlg, #lowerValue');
+    for (let i = 0; i < setting.length; i++) {
+      setting[i].addEventListener(
+        'change',
+        function () {
+          saveUserSettingsToFS();
+        }
+      );
+    }
+
+    document.getElementById('signOut').addEventListener(
+      'click',
+      function () {
+        console.log('signOut');
+        firebase.auth().signOut();
+      }
+    );
+
+    document.getElementById('deleteAccount').addEventListener(
+      'click',
+      function () {
+        if (confirm('アカウントを削除します。今後通知されなくなりますがよろしいですか？')) {
+          console.log('deleteAccount');
+          // Firestoreのデータをユーザーよりも先に削除
+          firebase.firestore().collection('userSettings').doc(firebase.auth().currentUser.email).delete();
+
+          firebase.auth().currentUser.delete().then(() => {
+            console.log('Account delete OK');
+          }).catch((error) => {
+            console.error("Account delete error: ", error);
+            // FirebaseUIのDemoを参考にしてエラー対応
+            if (error.code == 'auth/requires-recent-login') {
+              // The user's credential is too old. She needs to sign in again.
+              firebase.auth().signOut().then(function () {
+                // The timeout allows the message to be displayed after the UI has changed to the signed out state.
+                setTimeout(function () {
+                  alert('アカウント削除のために再度ログインしてください');
+                }, 1);
+              });
+            }
+          });
+        };
+      }
+    );
+  </script>
 </body>
 
 </html>
