@@ -44,11 +44,11 @@
           console.log('User is signed in.');
           // ユーザー情報を表示
           document.getElementById('userDisplayName').textContent = user.displayName;
-          document.getElementById('userId').textContent = user.email;
+          document.getElementById('userEmail').textContent = user.email;
           document.getElementById('userPhoto').src = user.photoURL;
           // document.getElementById('lastSignInDate').textContent = new Date(firebase.auth().currentUser.metadata.lastSignInTime).toLocaleString().slice(0,-3);
           // 通知設定を表示
-          showUserSettings();
+          showUserSettings(user.uid);
           // 最後に画面項目を非表示→表示にする
           showAfterLogin();
         } else {
@@ -65,14 +65,13 @@
       initApp();
     });
 
-    function showUserSettings() {
+    function showUserSettings(uid) {
       const upperNotifyFlg = document.getElementById('upperNotifyFlg');
       const upperValue = document.getElementById('upperValue');
       const lowerNotifyFlg = document.getElementById('lowerNotifyFlg');
       const lowerValue = document.getElementById('lowerValue');
 
-      const docRef = firebase.firestore().collection('userSettings').doc(document.getElementById('userId').textContent);
-      docRef.get().then((doc) => {
+      firebase.firestore().collection('userSettings').doc(uid).get().then((doc) => {
         if (doc.exists) {
           // 通知設定が済みのユーザー
           const fields = doc.data();
@@ -80,34 +79,32 @@
           upperValue.value = fields.upperValue;
           lowerNotifyFlg.checked = fields.lowerNotifyFlg;
           lowerValue.value = fields.lowerValue;
-          showUpdateDate();
+          showUpdateDate(uid);
         } else {
           // 通知設定がまだのユーザー
           upperNotifyFlg.checked = true;
           upperValue.value = 130;
           lowerNotifyFlg.checked = true;
           lowerValue.value = 70;
-          saveUserSettingsToFS();
+          saveUserSettingsToFS(uid);
         }
       });
     }
 
-    function saveUserSettingsToFS() {
-      const docRef = firebase.firestore().collection('userSettings').doc(document.getElementById('userId').textContent);
-      docRef.set({
+    function saveUserSettingsToFS(uid) {
+      firebase.firestore().collection('userSettings').doc(uid).set({
         upperNotifyFlg: upperNotifyFlg.checked,
         upperValue: upperValue.value,
         lowerNotifyFlg: lowerNotifyFlg.checked,
         lowerValue: lowerValue.value,
         updateDate: new Date()
       }).then(function () {
-        showUpdateDate();
+        showUpdateDate(uid);
       });
     };
 
-    function showUpdateDate() {
-      const docRef = firebase.firestore().collection('userSettings').doc(document.getElementById('userId').textContent);
-      docRef.get().then((doc) => {
+    function showUpdateDate(uid) {
+      firebase.firestore().collection('userSettings').doc(uid).get().then((doc) => {
         document.getElementById('updateDate').textContent = doc.data().updateDate.toDate().toLocaleString().slice(0, -3);
       });
     }
@@ -136,7 +133,7 @@
                   <td><span id="userDisplayName"></span></td>
                 </tr>
                 <tr>
-                  <td><span id="userId"></span></td>
+                  <td><span id="userEmail"></span></td>
                 </tr>
                 <!-- <tr>
                     <td>前回ログイン: <span id="lastSignInDate"></span></td>
@@ -224,7 +221,7 @@
       setting[i].addEventListener(
         'change',
         function () {
-          saveUserSettingsToFS();
+          saveUserSettingsToFS(firebase.auth().currentUser.uid);
         }
       );
     }
@@ -243,7 +240,7 @@
         if (confirm('アカウントを削除します。今後通知されなくなりますがよろしいですか？')) {
           console.log('deleteAccount');
           // Firestoreのデータをユーザーよりも先に削除
-          firebase.firestore().collection('userSettings').doc(firebase.auth().currentUser.email).delete();
+          firebase.firestore().collection('userSettings').doc(firebase.auth().currentUser.uid).delete();
 
           firebase.auth().currentUser.delete().then(() => {
             console.log('Account delete OK');
