@@ -73,8 +73,6 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['M
         if (latestRatioDate === latestDate) {
           // ユーザー分繰り返し
           userSettings.forEach((doc) => {
-            // ユーザー情報
-            const mailAddress = doc.id;
             // ユーザー設定情報
             const fields = doc.data();
             const upperNotifyFlg = fields.upperNotifyFlg
@@ -88,15 +86,12 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['M
                 // 上回った場合
                 const subject = '上限値を上回りました(' + latestRatioDate + '時点)';
                 const content = '騰落レシオが上限値を上回りました。\n' + getCommonContent();
-
-                notifyUser(mailAddress, subject, content);
-
+                notifyUser(doc.id, subject, content);
               } else if (prevRatio >= upperValue && upperValue > latestRatio) {
                 // 下回った場合
                 const subject = '上限値を下回りました(' + latestRatioDate + '時点)';
                 const content = '騰落レシオが上限値を下回りました。\n' + getCommonContent();
-
-                notifyUser(mailAddress, subject, content);
+                notifyUser(doc.id, subject, content);
               }
             }
 
@@ -106,15 +101,12 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['M
                 // 下回った場合
                 const subject = '下限値を下回りました(' + latestRatioDate + '時点)';
                 const content = '騰落レシオが下限値を下回りました。\n' + getCommonContent();
-
-                notifyUser(mailAddress, subject, content);
-
+                notifyUser(doc.id, subject, content);
               } else if (prevRatio <= lowerValue && lowerValue < latestRatio) {
                 // 上回った場合
                 const subject = '下限値を上回りました(' + latestRatioDate + '時点)';
                 const content = '騰落レシオが下限値を上回りました。\n' + getCommonContent();
-
-                notifyUser(mailAddress, subject, content);
+                notifyUser(doc.id, subject, content);
               }
             }
 
@@ -133,16 +125,24 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['M
                 + '上限値: ' + upperValue + '%\n'
                 + '下限値で通知する: ' + (lowerNotifyFlg ? 'ON' : 'OFF') + '\n'
                 + '下限値: ' + lowerValue + '%\n'
-                + '\n'
-                + '〜 騰落レシオ通知 〜\n'
-                + '通知設定の変更、通知メールの配信停止等はこちらから\n'
-                + 'https://updownratio.web.app/\n'
-                + '';
             }
           });
         }
       }
     );
+  });
+
+exports.notifyRegistration = functions.region('asia-northeast1').runWith({ secrets: ['MAIL_USER', 'MAIL_PASS'] })
+  .https.onCall((data, context) => {
+    const subject = 'ユーザー登録完了のお知らせ';
+    const content =
+      'この度は「騰落レシオ通知」にユーザー登録いただき誠にありがとうございます。\n'
+      + '\n'
+      + '引き続き、通知設定の画面でお好みの通知条件を設定してください。\n'
+      + 'あとは条件を満たしたら通知が届きます！\n';
+
+    // uidをdocIdにしている
+    notifyUser(context.auth.uid, subject, content);
   });
 
 // Firestoreから最新と1つ前の騰落レシオを取得
@@ -180,8 +180,12 @@ async function getUserSettingsFromFS() {
   return (await db.collection('userSettings').get()).docs;
 };
 
-function notifyUser(to, subject, content) {
-  sendMail(to, subject, content);
+function notifyUser(docId, subject, content) {
+  admin.auth().getUser(docId).then((userRecord) => {
+    sendMail(userRecord.email, subject, content);
+  }).catch((error) => {
+    console.error(error);
+  });
 };
 
 function sendMail(to, subject, content) {
@@ -199,11 +203,18 @@ function sendMail(to, subject, content) {
     },
   });
 
+  const text = content
+    + '\n'
+    + '〜 騰落レシオ通知 〜\n'
+    + '通知設定の変更、通知メールの配信停止等はこちらから\n'
+    + 'https://updownratio.web.app/\n'
+    + '';
+
   transporter.sendMail({
     from: '"騰落レシオ通知" <noreply@updownratio.firebaseapp.com>',
     to: to,
     subject: subject,
-    text: content,
+    text: text,
   }, function (err, info) {
     if (err) {
       console.error(err);

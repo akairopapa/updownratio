@@ -26,6 +26,7 @@
   <script src="/__/firebase/7.14.5/firebase-app.js"></script>
   <script src="/__/firebase/7.14.5/firebase-auth.js"></script>
   <script src="/__/firebase/7.14.5/firebase-firestore.js"></script>
+  <script src="/__/firebase/7.14.5/firebase-functions.js"></script>
   <script src="/__/firebase/7.14.5/firebase-analytics.js"></script>
   <script src="/__/firebase/init.js"></script>
 
@@ -46,7 +47,6 @@
           document.getElementById('userDisplayName').textContent = user.displayName;
           document.getElementById('userEmail').textContent = user.email;
           document.getElementById('userPhoto').src = user.photoURL;
-          // document.getElementById('lastSignInDate').textContent = new Date(firebase.auth().currentUser.metadata.lastSignInTime).toLocaleString().slice(0,-3);
           // 通知設定を表示
           showUserSettings(user);
           // 最後に画面項目を非表示→表示にする
@@ -87,13 +87,15 @@
           lowerNotifyFlg.checked = true;
           lowerValue.value = 70;
           saveUserSettingsToFS(user);
+          notifyRegistration();
         }
+      }).catch((error) => {
+        console.error(error);
       });
     }
 
     function saveUserSettingsToFS(user) {
       firebase.firestore().collection('userSettings').doc(user.uid).set({
-        email: user.email,
         upperNotifyFlg: upperNotifyFlg.checked,
         upperValue: upperValue.value,
         lowerNotifyFlg: lowerNotifyFlg.checked,
@@ -101,12 +103,25 @@
         updateDate: firebase.firestore.FieldValue.serverTimestamp()
       }).then(function () {
         showUpdateDate(user);
+      }).catch((error) => {
+        console.error(error);
       });
     };
 
     function showUpdateDate(user) {
       firebase.firestore().collection('userSettings').doc(user.uid).get().then((doc) => {
         document.getElementById('updateDate').textContent = doc.data().updateDate.toDate().toLocaleString().slice(0, -3);
+      }).catch((error) => {
+        console.error(error);
+      });
+    }
+
+    function notifyRegistration() {
+      const notifyRegistration = firebase.app().functions('asia-northeast1').httpsCallable('notifyRegistration');
+      notifyRegistration().then((result) => {
+        alert('ユーザー登録完了メールをお送りしました。ご確認ください。')
+      }).catch((error) => {
+        console.error(error);
       });
     }
 
@@ -136,15 +151,12 @@
                 <tr>
                   <td><span id="userEmail"></span></td>
                 </tr>
-                <!-- <tr>
-                    <td>前回ログイン: <span id="lastSignInDate"></span></td>
-                  </tr> -->
               </table>
             </li>
             <li class="dropdown-item">
               <hr class="dropdown-divider">
             </li>
-            <!-- <li><a class="dropdown-item" href="lp.html"><i class="bi bi-house-door"></i> Home</a></li> -->
+            <li><a class="dropdown-item" href="lp.html"><i class="bi bi-house-door"></i> サービス紹介ページへ</a></li>
             <li><button class="dropdown-item" id="signOut"><i class="bi bi-box-arrow-right"></i> ログアウト</button></li>
             <li class="dropdown-item">
               <hr class="dropdown-divider">
@@ -230,30 +242,37 @@
     document.getElementById('signOut').addEventListener(
       'click',
       function () {
-        console.log('signOut');
-        firebase.auth().signOut();
+        firebase.auth().signOut().then(() => {
+          console.log('SignOut successful');
+        }).catch((error) => {
+          console.error('SignOut failed: ', error);
+        });
       }
     );
 
     document.getElementById('deleteAccount').addEventListener(
       'click',
       function () {
-        if (confirm('アカウントを削除します。今後通知されなくなりますがよろしいですか？')) {
-          console.log('deleteAccount');
-          // Firestoreのデータをユーザーよりも先に削除
-          firebase.firestore().collection('userSettings').doc(firebase.auth().currentUser.uid).delete();
-
-          firebase.auth().currentUser.delete().then(() => {
-            console.log('Account delete OK');
+        if (confirm('ユーザー登録を解除します。今後通知されなくなりますがよろしいですか？')) {
+          // Firestoreのデータ削除(ユーザーよりも先に削除)
+          firebase.firestore().collection('userSettings').doc(firebase.auth().currentUser.uid).delete().then(() => {
+            console.log('UserSettings deleted');
           }).catch((error) => {
-            console.error("Account delete error: ", error);
+            console.error('UserSettings not deleted: ', error);
+          });
+
+          // Firebaseのユーザーを削除
+          firebase.auth().currentUser.delete().then(() => {
+            console.log('AuthUser deleted');
+          }).catch((error) => {
+            console.error('AuthUser not deleted: ', error);
             // FirebaseUIのDemoを参考にしてエラー対応
             if (error.code == 'auth/requires-recent-login') {
               // The user's credential is too old. She needs to sign in again.
               firebase.auth().signOut().then(function () {
                 // The timeout allows the message to be displayed after the UI has changed to the signed out state.
                 setTimeout(function () {
-                  alert('アカウント削除のために再度ログインしてください');
+                  alert('最終ログインから時間が経っているため、ユーザー登録解除ができませんでした。お手数ですが再度ログインしてやり直してください。');
                 }, 1);
               });
             }
