@@ -3,8 +3,8 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
-// スケジュール設定で毎日18:15に定期実行
-exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').pubsub.schedule('15 18 * * *').timeZone('Asia/Tokyo').onRun((context) => {
+// スケジュール設定で毎日17:15に定期実行
+exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').pubsub.schedule('15 17 * * *').timeZone('Asia/Tokyo').onRun((context) => {
   const client = require('cheerio-httpcli');
   const url = 'https://nikkeiyosoku.com/up_down_ratio/';
 
@@ -50,9 +50,9 @@ function setRatioToFS(ratioDate, ratio) {
   db.collection('ratios').doc(ratioDateYYYYMMDD).set(data);
 }
 
-// スケジュール設定で毎日18:30に定期実行
+// スケジュール設定で毎日17:30に定期実行
 exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['MAIL_USER', 'MAIL_PASS'] })
-  .pubsub.schedule('30 18 * * *').timeZone('Asia/Tokyo').onRun((context) => {
+  .pubsub.schedule('30 17 * * *').timeZone('Asia/Tokyo').onRun((context) => {
     Promise.all([
       getLatestRatiosFromFS(),
       getUserSettingsFromFS()
