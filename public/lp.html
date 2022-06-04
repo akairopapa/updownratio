@@ -1,19 +1,216 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>騰落レシオ通知</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-  </head>
-  <body>
-    <div class="container">
-      <h1>ランディングページ</h1>
-      <a href="index.html">ログインへ</a>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>サービス紹介 | 騰落レシオ通知</title>
+  <meta name=”description”
+    content=”騰落レシオ通知は、騰落レシオ(Up-down-ratio)が自分の決めた値になったら通知をお届けするサービスです。このサービスを利用すれば、株の売買タイミングを見逃しません！”>
+
+  <!-- アイコン関連 Favicon Generatorで作成 -->
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png">
+  <!-- <link rel="manifest" href="/icons/site.webmanifest"> -->
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#142a43">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+
+  <!-- 本サイト用 -->
+  <link type="text/css" rel="stylesheet" href="site.css">
+</head>
+
+<body>
+  <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-primary mb-2">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#"><img src="icons/favicon.ico" alt="騰落レシオ通知アイコン" id="navbarImg"> 騰落レシオ通知</a>
+      <a class="btn nav-btn-sign-up" href="/" role="button"><i class="bi bi-box-arrow-in-right"></i>
+        ログイン<br>(ユーザー登録)</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#Navbar"
+        aria-controls="Navbar" aria-expanded="false" aria-label="ナビゲーションの切替">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="Navbar">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="#what"><i class="bi bi-question-octagon"></i> このサービスについて</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#fee"><i class="bi bi-coin"></i> 料金</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#usage"><i class="bi bi-person"></i> 利用方法</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link"
+              href="https://docs.google.com/forms/d/e/1FAIpQLSdnzChPeJPv_1LW2KsCpiHLDnlsYy2-_HQbhLtTEnQu5lbwBw/viewform?usp=sf_link"
+              target="_blank" rel="noopener noreferrer"><i class="bi bi-envelope"></i> お問い合わせ</a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </nav>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
-  </body>
+  <main>
+    <div class="container-fluid">
+      <div id="carouselIndicators" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#carouselIndicators" data-bs-slide-to="0" class="active"
+            aria-current="true" aria-label="Slide 1"></button>
+          <button type="button" data-bs-target="#carouselIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+        </div>
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <!-- TODO -->
+            <img src="icons/android-chrome-192x192.png" class="d-block w-100" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+              <h5>First slide label</h5>
+              <p>Some representative placeholder content for the first slide.</p>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img src="icons/maskable_icon_x192.png" class="d-block w-100" alt="...">
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselIndicators" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselIndicators" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8">
+          <div class="row">
+            <div class="col-md-6 main-panel">
+              <h2 class="fw-normal anchor" id="what"><img src="icons/favicon.ico" alt="騰落レシオ通知アイコン" id="iconImg">
+                どういうサービス？</h2>
+              <p>騰落レシオが自分の決めた値になったら通知をお届けするサービスです。</p>
+              <p class="fw-bold fs-4">このサービスを利用すれば、株の売買タイミングを見逃しません！</p>
+            </div>
+            <div class="col-md-6 main-panel">
+              <h2 class="fw-normal"><i class="bi bi-balloon-heart"></i> メリット</h2>
+              <p>騰落レシオはその性質上、中期的な投資タイミングを判断するのに用いられます。ただ、そんな中期的な指標をウォッチし続けるのは面倒ではありませんか？</p>
+              <p>その面倒くささを解消するためにこのサービスを始めました。</p>
+            </div>
+          </div>
+          <hr>
+
+          <div class="row">
+            <div class="col-md-6 main-panel">
+              <h2 class="fw-normal anchor" id="fee"><i class="bi bi-coin"></i> 料金</h2>
+              <p id="free">¥0<br>(無料)</p>
+              <p class="text-muted">(サービスの運用状況によって見直す可能性がございます)</p>
+            </div>
+            <div class="col-md-6 main-panel">
+              <h2 class="fw-normal"><i class="bi bi-phone"></i> スマホでもパソコンでも</h2>
+              <p>ご利用はスマホやパソコンのブラウザがあればOK。またアプリ(iPhone/Android)のようにインストールして利用することもできます。</p>
+              <p class="text-muted">(本サービスはPWA(Progressive Web Apps)に対応しています)</p>
+            </div>
+          </div>
+          <hr>
+
+          <div class="row">
+            <div class="col-md-12 main-panel">
+              <h2 class="fw-normal anchor" id="usage"><i class="bi bi-person"></i> 利用方法</h2>
+              <p>簡単な3ステップでご利用いただけます。お気軽にお試しください。</p>
+              <div class="col-md-12 usage-step">
+                <h4>STEP1: ユーザー登録</h4>
+                <p>ご利用にあたっては、事前にGoogleアカウントが必要となります。</p>
+                <p>お持ちの方は、ユーザー登録から始めてください。</p>
+                <div class="btn-center">
+                  <a class="btn btn-sign-up" href="/" role="button"><i class="bi bi-pencil-square"></i> ユーザー登録</a>
+                </div>
+              </div>
+              <div class="col-md-12 usage-step">
+                <h4>STEP2: メールの受信確認</h4>
+                <p>ユーザー登録後しばらくすると、ユーザー登録完了メールが届きます。</p>
+                <p>迷惑メールに分類されていないか等、確認してください。</p>
+              </div>
+              <div class="col-md-12 usage-step">
+                <h4>STEP3: 通知条件の設定</h4>
+                <p>通知設定の画面でお好みの通知条件を設定してください。</p>
+                <p>あとは条件を満たしたら通知が届きます！</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="side-panel">
+            <h4 class="fst-italic"><i class="bi bi-graph-up-arrow"></i> 騰落レシオとは</h4>
+            <p>騰落レシオ(Up-down ratio)は株式市場の過熱感を示すテクニカル指標の一種です。</p>
+            <p>一般的に、100%を大きく上回った場合は買われすぎであるため「売りのタイミング」であり、100%を大きく下回った場合は売られすぎであるため「買いのタイミング」であると判断されます。</p>
+          </div>
+
+          <div class="side-panel">
+            <h4 class="fst-italic"><i class="bi bi-send-plus"></i> 新機能</h4>
+            <ul>
+              <li>Ver.1.0.0（2022/6/1）
+                <p>初期リリース</p>
+              </li>
+            </ul>
+          </div>
+
+          <div class="side-panel">
+            <h4 class="fst-italic"><i class="bi bi-box-arrow-up-right"></i> 外部リンク</h4>
+            <ul>
+              <li>
+                <a href="https://nikkeiyosoku.com/up_down_ratio/" target="_blank" rel="noopener noreferrer">投資の森</a>
+                <p>このサービスはこちらの騰落レシオを利用させていただいております</p>
+              </li>
+              <li>
+                <a href="https://nikkei225jp.com/data/touraku.php" target="_blank" rel="noopener noreferrer">騰落レシオ
+                  日経平均比較チャート</a>
+              </li>
+              <li>
+                <a href="https://github.com/akairopapa/updownratio" target="_blank"
+                  rel="noopener noreferrer">このサービスのGitHub</a>
+              </li>
+              <li>
+                <a href="https://akairopapa.hatenablog.com/" target="_blank" rel="noopener noreferrer">開発者のブログ</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+  </main>
+
+  <footer class="container-fluid">
+    <p><a href="lp.html">サービス紹介</a> | <a href="tos.html">利用規約</a> | <a href="privacy.html">プライバシーポリシー</a> | <a
+        href="https://docs.google.com/forms/d/e/1FAIpQLSdnzChPeJPv_1LW2KsCpiHLDnlsYy2-_HQbhLtTEnQu5lbwBw/viewform?usp=sf_link"
+        target="_blank" rel="noopener noreferrer">お問い合わせ</a>
+    </p>
+    <p class="text-muted">Copyright &copy; 2022 akairopapa All rights reserved.</p>
+  </footer>
+  <div id="pageTop"><a href="#"><i class="bi bi-arrow-bar-up"></i></a></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+    crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    // ナビバーのリンクを押したらCollapseを閉じる
+    let navLink = document.getElementsByClassName('nav-link');
+    for (let i = 0; i < navLink.length; i++) {
+      navLink[i].addEventListener(
+        'click',
+        function () {
+          document.getElementById('Navbar').classList.remove('show');
+        }
+      );
+    }
+  </script>
+</body>
+
 </html>
