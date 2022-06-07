@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html>
 
-<head>
+<head prefix="og: https://ogp.me/ns#">
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>サービス紹介 | 騰落レシオ通知</title>
-  <meta name=”description”
-    content=”騰落レシオ通知は、騰落レシオ(Up-down-ratio)が自分の決めた値になったら通知をお届けするサービスです。このサービスを利用すれば、株の売買タイミングを見逃しません！”>
+  <meta name=”description” content=”騰落レシオが自分の決めた値になったら通知します。このサービスを利用すれば、株の売買タイミングを見逃しません！”>
+
+  <!-- OGP -->
+  <meta property="og:site_name" content="騰落レシオ通知">
+  <meta property="og:title" content="サービス紹介 | 騰落レシオ通知">
+  <meta property="og:description" content="騰落レシオが自分の決めた値になったら通知します。このサービスを利用すれば、株の売買タイミングを見逃しません！">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://updownratio.web.app/lp.html">
+  <meta property="og:image" content="https://updownratio.web.app/icons/updownratio.png">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:site" content="@akairopapa">
 
   <!-- アイコン関連 Favicon Generatorで作成 -->
   <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
@@ -29,7 +38,7 @@
 </head>
 
 <body>
-  <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-primary mb-2">
+  <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-primary">
     <div class="container-fluid">
       <a class="navbar-brand" href="#"><img src="icons/favicon.ico" alt="騰落レシオ通知アイコン" id="navbarImg"> 騰落レシオ通知</a>
       <a class="btn nav-btn-sign-up" href="/" role="button"><i class="bi bi-box-arrow-in-right"></i>
@@ -60,24 +69,27 @@
   </nav>
 
   <main>
-    <div class="container-fluid">
+    <div class="container-fluid carousel-max">
       <div id="carouselIndicators" class="carousel slide" data-bs-ride="carousel">
         <div class="carousel-indicators">
           <button type="button" data-bs-target="#carouselIndicators" data-bs-slide-to="0" class="active"
             aria-current="true" aria-label="Slide 1"></button>
           <button type="button" data-bs-target="#carouselIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+          <button type="button" data-bs-target="#carouselIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
         </div>
         <div class="carousel-inner">
           <div class="carousel-item active">
-            <!-- TODO -->
-            <img src="icons/android-chrome-192x192.png" class="d-block w-100" alt="...">
-            <div class="carousel-caption d-none d-md-block">
+            <img src="images/main.png" class="d-block w-100" alt="騰落レシオ通知サービス">
+            <!-- <div class="carousel-caption d-none d-md-block">
               <h5>First slide label</h5>
               <p>Some representative placeholder content for the first slide.</p>
-            </div>
+            </div> -->
           </div>
           <div class="carousel-item">
-            <img src="icons/maskable_icon_x192.png" class="d-block w-100" alt="...">
+            <img src="images/trading-timing.png" class="d-block w-100" alt="株の売買タイミング">
+          </div>
+          <div class="carousel-item">
+            <img src="images/pwa-guide.png" class="d-block w-100" alt="スマホへのインストール">
           </div>
         </div>
         <button class="carousel-control-prev" type="button" data-bs-target="#carouselIndicators" data-bs-slide="prev">
@@ -89,7 +101,9 @@
           <span class="visually-hidden">Next</span>
         </button>
       </div>
+    </div>
 
+    <div class="container-fluid">
       <div class="row">
         <div class="col-md-8">
           <div class="row">
@@ -157,7 +171,7 @@
           <div class="side-panel">
             <h4 class="fst-italic"><i class="bi bi-send-plus"></i> 新機能</h4>
             <ul>
-              <li>Ver.1.0.0（2022/6/1）
+              <li>Ver.1.0.0（2022/6/3）
                 <p>初期リリース</p>
               </li>
             </ul>

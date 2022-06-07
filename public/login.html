@@ -57,9 +57,9 @@
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
       ],
       // Terms of service url.
-      tosUrl: '<your-tos-url>',
+      tosUrl: '/tos.html',
       // Privacy policy url.
-      privacyPolicyUrl: '<your-privacy-policy-url>'
+      privacyPolicyUrl: '/privacy.html'
     };
     // Initialize the FirebaseUI Widget using Firebase.
     var ui = new firebaseui.auth.AuthUI(firebase.auth());
@@ -69,23 +69,46 @@
 </head>
 
 <body>
-  <nav class="navbar fixed-top navbar-dark bg-primary mb-2">
+  <nav class="navbar fixed-top navbar-expand-md navbar-dark bg-primary">
     <div class="container-fluid container-fluid-max">
       <a class="navbar-brand" href="lp.html"><img src="icons/favicon.ico" alt="騰落レシオ通知アイコン" id="navbarImg"> 騰落レシオ通知</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#Navbar"
+        aria-controls="Navbar" aria-expanded="false" aria-label="ナビゲーションの切替">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="Navbar">
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" href="lp.html"><i class="bi bi-house-door"></i> サービス紹介ページへ</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 
   <main>
     <div class="container-fluid container-fluid-max">
-      <!-- <div id="login" class="none"> -->
       <div id="login">
         <div class="card">
           <h5 class="card-header bg-secondary"><i class="bi bi-box-arrow-in-right"></i> ログイン(ユーザー登録)</h5>
           <div class="card-body">
             <!-- <h5 class="card-title">card-title</h5>
               <h6 class="card-subtitle text-muted">card-subtitle</h6> -->
-            <p>ログイン説明いろいろ</p>
-            <div id="firebaseui-auth-container"></div>
+            <p>本サービスのご利用にあたり、以下のいずれかの方法でログイン(ユーザー登録)して、通知条件を設定してください。</p>
+            <p>騰落レシオが通知条件を満たした場合、選択されたアカウントにメールで通知します。</p>
+
+            <div class="col-sm-10 offset-sm-1 col-md-8 offset-md-2">
+              <div id="firebaseui-auth-container"></div>
+            </div>
+
+            <ul>
+              <li>通知が不要となった場合は、ユーザー登録を解除してください。</li>
+              <li>通知先を変更したい場合は、一度ユーザー登録を解除して、ご希望のアカウントで再度登録してください。</li>
+              <li>
+                <p>アプリ(iPhone/Android)のように、スマホにインストールして利用することもできます。<br>
+                  →なお、通知が不要となった場合、アンインストールしてもユーザー登録を解除しないと通知が届き続けるので注意してください。
+              </li>
+            </ul>
           </div>
         </div>
       </div>

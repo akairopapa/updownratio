@@ -1,48 +1,150 @@
+/* 全体
+-------------------------------------------------- */
 body {
   background-color: #edf2f7;
+  padding-top: 4.5rem;
 }
 
-.container-fluid {
-  max-width: 768px;
+footer {
+  text-align: center;
+}
+
+.bg-primary {
+  background-color: #142a43 !important;
+}
+
+.bg-secondary {
+  background-color: #ffcb2b !important;
 }
 
 #navbarImg {
-  height: 30px;
+  height: 1.9rem;
   border: solid #edf2f7;
-  border-radius: 5px;
+  border-radius: 0.3rem;
+}
+
+#iconImg {
+  height: 2.5rem;
+}
+
+#pageTop a {
+  color: #edf2f7;
+  /* #142a43で透明度を指定 */
+  background-color: rgba(20, 42, 67, 0.2);
+  font-size: 2rem;
+  border-radius: 0.3rem;
+  padding: 0.2rem 0.8rem;
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 100;
+}
+
+/* ランディングページ
+-------------------------------------------------- */
+.carousel-max {
+  max-width: 640px;
+}
+
+.carousel {
+  margin-bottom: 1rem;
+}
+
+/* 画像を配置しているので、キャプションを手助けする必要がある */
+/* .carousel-caption {
+  bottom: 3rem;
+  z-index: 10;
+} */
+
+.btn-center {
+  text-align: center;
+}
+
+.nav-btn-sign-up {
+  background-color: #ffcb2b;
+  padding: 0.19rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.btn-sign-up {
+  background-color: #ffcb2b;
+  border-color: #142a43;
+  border-width: 0.3rem;
+  padding: 0.5rem 2rem;
+  font-size: 1.3rem;
+}
+
+/* ページ内リンク押下時にナビバーの裏に隠れないようにする */
+.anchor {
+  margin-top: -6rem;
+  padding-top: 6rem;
+}
+
+.main-panel {
+  padding: 1.5rem;
+}
+
+.main-panel>h2 {
+  margin-bottom: 1.5rem;
+}
+
+.side-panel {
+  background-color: #f8f9fA;
+  padding: 1.8rem;
+  margin-bottom: 1rem;
+  border-radius: 0.25rem;
+}
+
+#free {
+  font-size: 3rem;
+  font-weight: bold;
+  text-align: center;
+  margin-top: -1rem;
+  margin-bottom: 2rem;
+  line-height: 3.5rem;
+}
+
+.usage-step {
+  background-color: #feeebc;
+  padding: 1.0rem;
+  margin: 1rem;
+  border-radius: 0.5rem;
+}
+
+.usage-step>h4 {
+  margin-bottom: 1.5rem;
+}
+
+/* 利用規約、プライバシーポリシー
+-------------------------------------------------- */
+.text-right {
+  text-align: right;
+}
+
+/* アプリ
+-------------------------------------------------- */
+.container-fluid-max {
+  max-width: 768px;
+}
+
+#firebaseui-auth-container {
+  padding: 2rem;
+  margin: 1.5rem 0;
+  border-style: solid;
+  border-color: #142a43;
+  border-radius: 0.5rem;
 }
 
 #userPhoto {
-  height: 40px;
+  height: 3rem;
 }
 
 .none {
-  /* visibility: hidden; */
   display: none;
 }
 
 .block {
-  /* visibility: hidden; */
   display: block;
-}
-
-.bg-primary{
-  /* background-color: #CFE2FF!important; */
-  /* background-color: #084298!important; */
-  /* background-color: #063a89!important; */
-  /* background-color: #061e34!important; */
-  background-color: #142a43!important;
-  /* background-color: #263b52!important; */
-  /* color: #ffffff!important; */
-  /* background-color: #1A73E8!important; */
-  /* background-color: #0A58CA!important; */
-}
-
-.bg-secondary{
-  background-color: #ffcb2b!important;
-  /* background-color: #CFE2FF!important; */
-  /* background-color: #084298!important;
-  background-color: #0A58CA!important; */
 }
 
 .form-check-input:checked {
