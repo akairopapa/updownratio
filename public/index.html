@@ -58,15 +58,14 @@
           document.getElementById('userEmail').textContent = user.email;
           document.getElementById('userPhoto').src = user.photoURL;
           document.getElementById('menu').className = 'block';
-          // 騰落レシオを表示
-          showUpDownRatio().then(
+          Promise.all([
+            // 騰落レシオを表示
+            showUpDownRatio(),
+            // 通知設定を表示
+            showUserSettings(user)
+          ]).then(
             response => {
               document.getElementById('upDownRatio').className = 'block';
-            }
-          );
-          // 通知設定を表示
-          showUserSettings(user).then(
-            response => {
               document.getElementById('userSettings').className = 'block';
             }
           );
