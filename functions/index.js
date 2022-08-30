@@ -132,6 +132,26 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['M
     );
   });
 
+exports.getLatestRatios = functions.region('asia-northeast1').https.onCall((data, context) => {
+  return getLatestRatiosFromFS().then(
+    latestRatios => {
+      // 最新の騰落レシオ
+      const latestRatioDate = latestRatios.get('latestRatioDate');
+      const latestRatio = latestRatios.get('latestRatio');
+      // 1つ前の騰落レシオ
+      const prevRatio = latestRatios.get('prevRatio');
+      // 騰落レシオの前日比（誤差がでるので小数点第一位で四捨五入）
+      const diffRatio = Math.round((latestRatio - prevRatio) * 10) / 10;
+
+      return {
+        latestRatioDate: latestRatioDate,
+        latestRatio: latestRatio + '%',
+        diffRatio: ((diffRatio > 0) ? ('+' + diffRatio) : diffRatio) + '%'
+      };
+    }
+  );
+});
+
 exports.notifyRegistration = functions.region('asia-northeast1').runWith({ secrets: ['MAIL_USER', 'MAIL_PASS'] })
   .https.onCall((data, context) => {
     const subject = 'ユーザー登録完了のお知らせ';

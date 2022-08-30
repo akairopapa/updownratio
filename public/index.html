@@ -57,12 +57,19 @@
           document.getElementById('userDisplayName').textContent = user.displayName;
           document.getElementById('userEmail').textContent = user.email;
           document.getElementById('userPhoto').src = user.photoURL;
+          document.getElementById('menu').className = 'block';
           // 騰落レシオを表示
-          showUpDownRatio();
+          showUpDownRatio().then(
+            response => {
+              document.getElementById('upDownRatio').className = 'block';
+            }
+          );
           // 通知設定を表示
-          showUserSettings(user);
-          // 最後に画面項目を非表示→表示にする
-          showAfterLogin();
+          showUserSettings(user).then(
+            response => {
+              document.getElementById('userSettings').className = 'block';
+            }
+          );
         } else {
           // ログインしていない場合
           console.log('User is signed out.');
@@ -77,36 +84,26 @@
       initApp();
     });
 
-    function showUpDownRatio() {
-      const ratioDate = document.getElementById('ratioDate');
-      const ratio = document.getElementById('ratio');
-
-      firebase.firestore().collection('ratios').orderBy('ratioDate', 'desc').limit(1).get().then((snapshot) => {
-        snapshot.forEach((doc) => {
-          const fields = doc.data();
-          ratioDate.textContent = formatSlashYYYYMMDD(fields.ratioDate);
-          ratio.textContent = fields.ratio + '%';
-        })
+    async function showUpDownRatio() {
+      const getLatestRatios = firebase.app().functions('asia-northeast1').httpsCallable('getLatestRatios');
+      return getLatestRatios().then((result) => {
+        const latestRatios = JSON.parse(JSON.stringify(result.data));
+        document.getElementById('ratioDate').textContent = latestRatios.latestRatioDate;
+        document.getElementById('ratio').textContent = latestRatios.latestRatio;
+        document.getElementById('diffRatio').textContent = latestRatios.diffRatio;
+        document.getElementById('now').textContent = new Date().toLocaleString().slice(0, -3);
       }).catch((error) => {
         console.error(error);
       });
-
-      document.getElementById('now').textContent = new Date().toLocaleString().slice(0, -3);
     }
 
-    function formatSlashYYYYMMDD(fsTimestamp) {
-      const date = fsTimestamp.toDate();
-      // YYYY/MM/DD形式の文字列
-      return date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
-    }
-
-    function showUserSettings(user) {
+    async function showUserSettings(user) {
       const upperNotifyFlg = document.getElementById('upperNotifyFlg');
       const upperValue = document.getElementById('upperValue');
       const lowerNotifyFlg = document.getElementById('lowerNotifyFlg');
       const lowerValue = document.getElementById('lowerValue');
 
-      firebase.firestore().collection('userSettings').doc(user.uid).get().then((doc) => {
+      return firebase.firestore().collection('userSettings').doc(user.uid).get().then((doc) => {
         if (doc.exists) {
           // 通知設定が済みのユーザー
           const fields = doc.data();
@@ -159,12 +156,6 @@
         console.error(error);
       });
     }
-
-    function showAfterLogin() {
-      document.getElementById('menu').className = 'block';
-      document.getElementById('upDownRatio').className = 'block';
-      document.getElementById('userSettings').className = 'block';
-    };
   </script>
 </head>
 
@@ -224,10 +215,12 @@
               <tr>
                 <th>日付</th>
                 <th>騰落レシオ(25日)</th>
+                <th>前日比</th>
               </tr>
               <tr>
                 <td id="ratioDate"></td>
                 <td id="ratio"></td>
+                <td id="diffRatio"></td>
               </tr>
             </table>
           </div>
