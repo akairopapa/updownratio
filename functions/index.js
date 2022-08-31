@@ -39,15 +39,26 @@ exports.setRatio = functions.region('asia-northeast1').https.onRequest((request,
   response.send(ratioDate + ': ' + ratio);
 });
 
-function setRatioToFS(ratioDate, ratio) {
+async function setRatioToFS(ratioDate, ratio) {
   const ratioDateYYYYMMDD = ratioDate.getFullYear() + ('00' + (ratioDate.getMonth() + 1)).slice(-2) + ('00' + ratioDate.getDate()).slice(-2);
-  const data = {
+  const docRef = db.collection('ratios').doc(ratioDateYYYYMMDD);
+  return docRef.set({
     ratioDate: ratioDate,
     ratio: ratio,
     date: new Date()
-  };
-
-  db.collection('ratios').doc(ratioDateYYYYMMDD).set(data);
+  }).then(
+    () => {
+      // 最新の騰落レシオを設定後、後追いで前日比だけを更新。休日等があるので、最初から前日比を設定するのは難しいと思われる
+      getLatestRatiosFromFS().then(
+        latestRatios => {
+          docRef.update({
+            // 騰落レシオの前日比（誤差がでるので小数点第一位で四捨五入）
+            diffRatio: Math.round((latestRatios.get('latestRatio') - latestRatios.get('prevRatio')) * 10) / 10
+          })
+        }
+      )
+    }
+  );
 }
 
 // スケジュール設定で毎日17:30に定期実行
@@ -112,8 +123,8 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['M
 
             // 本文の共通文言を記載
             function getCommonContent() {
-              // 騰落レシオの前日比（誤差がでるので小数点第一位で四捨五入）
-              const diffRatio = Math.round((latestRatio - prevRatio) * 10) / 10;
+              // 騰落レシオの前日比
+              const diffRatio = latestRatios.get('latestDiffRatio');
 
               return '\n'
                 + '■ ' + latestRatioDate + '時点\n'
@@ -131,26 +142,6 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['M
       }
     );
   });
-
-exports.getLatestRatios = functions.region('asia-northeast1').https.onCall((data, context) => {
-  return getLatestRatiosFromFS().then(
-    latestRatios => {
-      // 最新の騰落レシオ
-      const latestRatioDate = latestRatios.get('latestRatioDate');
-      const latestRatio = latestRatios.get('latestRatio');
-      // 1つ前の騰落レシオ
-      const prevRatio = latestRatios.get('prevRatio');
-      // 騰落レシオの前日比（誤差がでるので小数点第一位で四捨五入）
-      const diffRatio = Math.round((latestRatio - prevRatio) * 10) / 10;
-
-      return {
-        latestRatioDate: latestRatioDate,
-        latestRatio: latestRatio + '%',
-        diffRatio: ((diffRatio > 0) ? ('+' + diffRatio) : diffRatio) + '%'
-      };
-    }
-  );
-});
 
 exports.notifyRegistration = functions.region('asia-northeast1').runWith({ secrets: ['MAIL_USER', 'MAIL_PASS'] })
   .https.onCall((data, context) => {
@@ -178,16 +169,15 @@ async function getLatestRatiosFromFS() {
       latestRatios.set('latestRatioDate', formatSlashYYYYMMDD(fields.ratioDate));
       latestRatios.set('latestRatio', fields.ratio);
       latestRatios.set('latestDate', formatSlashYYYYMMDD(fields.date));
+      latestRatios.set('latestDiffRatio', fields.diffRatio);
     } else {
-      latestRatios.set('prevRatioDate', formatSlashYYYYMMDD(fields.ratioDate));
       latestRatios.set('prevRatio', fields.ratio);
-      latestRatios.set('prevDate', formatSlashYYYYMMDD(fields.date));
     }
     docIndex++;
   });
 
   return latestRatios;
-};
+}
 
 function formatSlashYYYYMMDD(fsTimestamp) {
   const date = fsTimestamp.toDate();
@@ -198,7 +188,7 @@ function formatSlashYYYYMMDD(fsTimestamp) {
 // Firestoreからユーザー設定を取得
 async function getUserSettingsFromFS() {
   return (await db.collection('userSettings').get()).docs;
-};
+}
 
 function notifyUser(docId, subject, content) {
   admin.auth().getUser(docId).then((userRecord) => {
@@ -206,7 +196,7 @@ function notifyUser(docId, subject, content) {
   }).catch((error) => {
     console.error(error);
   });
-};
+}
 
 function sendMail(to, subject, content) {
   const nodemailer = require('nodemailer');

@@ -84,16 +84,23 @@
     });
 
     async function showUpDownRatio() {
-      const getLatestRatios = firebase.app().functions('asia-northeast1').httpsCallable('getLatestRatios');
-      return getLatestRatios().then((result) => {
-        const latestRatios = JSON.parse(JSON.stringify(result.data));
-        document.getElementById('ratioDate').textContent = latestRatios.latestRatioDate;
-        document.getElementById('ratio').textContent = latestRatios.latestRatio;
-        document.getElementById('diffRatio').textContent = latestRatios.diffRatio;
-        document.getElementById('now').textContent = new Date().toLocaleString().slice(0, -3);
+      firebase.firestore().collection('ratios').orderBy('ratioDate', 'desc').limit(1).get().then((snapshot) => {
+        snapshot.forEach((doc) => {
+          const fields = doc.data();
+          document.getElementById('ratioDate').textContent = formatSlashYYYYMMDD(fields.ratioDate);
+          document.getElementById('ratio').textContent = fields.ratio.toFixed(1) + '%';
+          document.getElementById('diffRatio').textContent = ((fields.diffRatio > 0) ? ('+' + fields.diffRatio) : fields.diffRatio) + '%';
+          document.getElementById('now').textContent = new Date().toLocaleString().slice(0, -3);
+        })
       }).catch((error) => {
         console.error(error);
       });
+    }
+
+    function formatSlashYYYYMMDD(fsTimestamp) {
+      const date = fsTimestamp.toDate();
+      // YYYY/MM/DD形式の文字列
+      return date.getFullYear() + '/' + (date.getMonth() + 1) + '/' + date.getDate();
     }
 
     async function showUserSettings(user) {
