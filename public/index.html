@@ -89,7 +89,7 @@
           const fields = doc.data();
           document.getElementById('ratioDate').textContent = formatSlashYYYYMMDD(fields.ratioDate);
           document.getElementById('ratio').textContent = fields.ratio.toFixed(1) + '%';
-          document.getElementById('diffRatio').textContent = ((fields.diffRatio > 0) ? ('+' + fields.diffRatio) : fields.diffRatio) + '%';
+          document.getElementById('diffRatio').textContent = ((fields.diffRatio > 0) ? ('+' + fields.diffRatio.toFixed(1)) : fields.diffRatio.toFixed(1)) + '%';
           document.getElementById('now').textContent = new Date().toLocaleString().slice(0, -3);
         })
       }).catch((error) => {
