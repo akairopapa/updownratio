@@ -62,7 +62,7 @@ async function setRatioToFS(ratioDate, ratio) {
 }
 
 // スケジュール設定で毎日17:30に定期実行
-exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['MAIL_USER', 'MAIL_PASS'] })
+exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['SENDGRID_API_KEY'] })
   .pubsub.schedule('30 17 * * *').timeZone('Asia/Tokyo').onRun((context) => {
     Promise.all([
       getLatestRatiosFromFS(),
@@ -143,7 +143,7 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['M
     );
   });
 
-exports.notifyRegistration = functions.region('asia-northeast1').runWith({ secrets: ['MAIL_USER', 'MAIL_PASS'] })
+exports.notifyRegistration = functions.region('asia-northeast1').runWith({ secrets: ['SENDGRID_API_KEY'] })
   .https.onCall((data, context) => {
     const subject = 'ユーザー登録完了のお知らせ';
     const content =
@@ -199,19 +199,9 @@ function notifyUser(docId, subject, content) {
 }
 
 function sendMail(to, subject, content) {
-  const nodemailer = require('nodemailer');
-
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    port: 465,
-    secure: true,
-    auth: {
-      // メールアドレス（シークレットから取得）
-      user: process.env.MAIL_USER,
-      // 16桁のアプリパスワード（シークレットから取得）
-      pass: process.env.MAIL_PASS,
-    },
-  });
+  const sgMail = require('@sendgrid/mail');
+  // SendGridのAPIキー（シークレットから取得）
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
   const text = content
     + '\n'
@@ -220,16 +210,14 @@ function sendMail(to, subject, content) {
     + 'https://updownratio.web.app/\n'
     + '';
 
-  transporter.sendMail({
-    from: '"騰落レシオ通知" <noreply@updownratio.firebaseapp.com>',
+  sgMail.send({
+    from: '"騰落レシオ通知" <noreply@updownratio.web.app>',
     to: to,
     subject: subject,
-    text: text,
-  }, function (err, info) {
-    if (err) {
-      console.error(err);
-    } else {
-      console.log(info.response)
-    }
+    text: text
+  }).then(() => {
+    console.log('メール送信OK to:' + to + ' subject:' + subject);
+  }).catch((error) => {
+    console.error(error);
   });
 }
