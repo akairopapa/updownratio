@@ -8,7 +8,11 @@
     ]
   },
   "functions": {
-    "source": "functions"
+    "source": "functions",
+    "ignore": [
+      ".cache",
+      "node_modules"
+    ]
   },
   "firestore": {
     "rules": "firestore.rules",
