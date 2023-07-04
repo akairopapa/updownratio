@@ -4,29 +4,46 @@ admin.initializeApp();
 const db = admin.firestore();
 
 // スケジュール設定で毎日17:15に定期実行
-exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').pubsub.schedule('15 17 * * *').timeZone('Asia/Tokyo').onRun((context) => {
-  const client = require('cheerio-httpcli');
-  const url = 'https://nikkeiyosoku.com/up_down_ratio/';
+exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').runWith({ memory: '2GB' }).pubsub.schedule('15 17 * * *').timeZone('Asia/Tokyo').onRun((context) => {
+  console.log('hoge');
+  const puppeteer = require('puppeteer');
 
-  client.fetch(url, function (err, $, res) {
-    if (err) {
-      console.error(err);
-    }
+  (async () => {
+    console.log('aa');
 
-    // 最新の騰落レシオを取得
-    let ratioDate;
-    let ratio;
-    $('td').each(function (i, e) {
-      if (i === 39) {
-        ratioDate = new Date($(e).text());
-      }
-      if (i === 43) {
-        ratio = Number($(e).text());
-      }
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-first-run',
+        '--no-sandbox',
+        '--no-zygote',
+        '--single-process'
+      ]
     });
 
-    setRatioToFS(ratioDate, ratio);
+    const url = 'https://nikkei225jp.com/data/touraku.php';
+    const page = await browser.newPage();
+    // domcontentloadedが一番速い。他の設定値だと余計なファイルの読み込み待ちになるのかも
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+    console.log('bb');
+
+    // 最新の騰落レシオを取得
+    const elem = await page.$('.dtb1');
+    const ratioDate = await elem.evaluate(el => el.textContent);
+    const elem2 = await page.$('.dtb6');
+    const ratio = await elem2.evaluate(el => el.textContent)
+    console.log(ratioDate + ':' + ratio);
+
+    await browser.close();
+
+    setRatioToFS(new Date(ratioDate), Number(ratio));
   });
+
+  // return null;
 });
 
 exports.setRatio = functions.region('asia-northeast1').https.onRequest((request, response) => {
