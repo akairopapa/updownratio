@@ -17,10 +17,10 @@ exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').pubsub.sche
     let ratioDate;
     let ratio;
     $('td').each(function (i, e) {
-      if (i === 29) {
+      if (i === 39) {
         ratioDate = new Date($(e).text());
       }
-      if (i === 33) {
+      if (i === 43) {
         ratio = Number($(e).text());
       }
     });
