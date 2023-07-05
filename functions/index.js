@@ -46,6 +46,42 @@ exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').runWith({ m
   // return null;
 });
 
+exports.testGetRatioFromSite = functions.region('asia-northeast1').runWith({ memory: '1GB' }).https.onRequest((request, response) => {
+  const puppeteer = require('puppeteer');
+
+  (async () => {
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: [
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--disable-setuid-sandbox',
+        '--no-first-run',
+        '--no-sandbox',
+        '--no-zygote',
+        '--single-process'
+      ]
+    });
+
+    const url = 'https://nikkei225jp.com/data/touraku.php';
+    const page = await browser.newPage();
+    // domcontentloadedが一番速い。他の設定値だと余計なファイルの読み込み待ちになるのかも
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+    // 最新の騰落レシオを取得
+    const elem = await page.$('.dtb1');
+    const ratioDate = await elem.evaluate(el => el.textContent);
+    const elem2 = await page.$('.dtb6');
+    const ratio = await elem2.evaluate(el => el.textContent)
+    console.log(ratioDate + ':' + ratio);
+    console.log(new Date(ratioDate) + ':' + Number(ratio));
+
+    await browser.close();
+
+    response.send(ratioDate + ': ' + ratio);
+  })();
+});
+
 exports.setRatio = functions.region('asia-northeast1').https.onRequest((request, response) => {
   // 騰落レシオ日はYYYYMMDD形式を想定
   const ratioDateYYYYMMDD = request.query.ratioDate;
