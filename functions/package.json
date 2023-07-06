@@ -6,7 +6,8 @@
     "shell": "firebase functions:shell",
     "start": "npm run shell",
     "deploy": "firebase deploy --only functions",
-    "logs": "firebase functions:log"
+    "logs": "firebase functions:log",
+    "postinstall": "node node_modules/puppeteer/install.js"
   },
   "engines": {
     "node": "16"
@@ -16,7 +17,8 @@
     "@sendgrid/mail": "^7.7.0",
     "cheerio-httpcli": "^0.8.3",
     "firebase-admin": "^10.0.2",
-    "firebase-functions": "^3.24.1"
+    "firebase-functions": "^4.4.1",
+    "puppeteer": "^20.7.4"
   },
   "devDependencies": {
     "firebase-functions-test": "^0.2.0"
