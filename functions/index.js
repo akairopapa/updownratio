@@ -292,7 +292,7 @@ function sendMail(to, subject, content) {
     text: text
   }).then(() => {
     console.log('メール送信OK to:' + to + ' subject:' + subject);
-  }).catch((eror) => {
+  }).catch((error) => {
     console.error(error);
   });
 }
