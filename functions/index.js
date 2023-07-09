@@ -5,31 +5,38 @@ const db = admin.firestore();
 
 // スケジュール設定で毎日17:15に定期実行
 exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').runWith({ memory: '2GB' }).pubsub.schedule('15 17 * * *').timeZone('Asia/Tokyo').onRun((context) => {
-  console.log('hoge');
   const puppeteer = require('puppeteer');
 
+  console.log('aa');
+
   (async () => {
-    console.log('aa');
+    console.log('bb');
 
     const browser = await puppeteer.launch({
       headless: 'new',
+      timeout: 25000, //test
       args: [
-        '--disable-gpu',
         '--disable-dev-shm-usage',
-        '--disable-setuid-sandbox',
-        '--no-first-run',
-        '--no-sandbox',
-        '--no-zygote',
-        '--single-process'
+        '--no-sandbox'
+        // '--disable-gpu',
+        // '--disable-dev-shm-usage',
+        // '--disable-setuid-sandbox',
+        // '--no-first-run',
+        // '--no-sandbox',
+        // '--no-zygote',
+        // '--single-process'
       ]
     });
+
+    console.log('cc');
 
     const url = 'https://nikkei225jp.com/data/touraku.php';
     const page = await browser.newPage();
     // domcontentloadedが一番速い。他の設定値だと余計なファイルの読み込み待ちになるのかも
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    // await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.goto(url, { timeout: 0, waitUntil: 'networkidle0' });
 
-    console.log('bb');
+    console.log(await page.title());
 
     // 最新の騰落レシオを取得
     const elem = await page.$('.dtb1');
@@ -41,12 +48,14 @@ exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').runWith({ m
     await browser.close();
 
     setRatioToFS(new Date(ratioDate), Number(ratio));
-  });
+  })().catch(e => console.error(e));
+
+  console.log('dd');
 
   // return null;
 });
 
-exports.testGetRatioFromSite = functions.region('asia-northeast1').runWith({ memory: '1GB' }).https.onRequest((request, response) => {
+exports.testGetRatioFromSite = functions.region('asia-northeast1').runWith({ memory: '2GB' }).https.onRequest((request, response) => {
   const puppeteer = require('puppeteer');
 
   (async () => {
@@ -66,19 +75,32 @@ exports.testGetRatioFromSite = functions.region('asia-northeast1').runWith({ mem
     const url = 'https://nikkei225jp.com/data/touraku.php';
     const page = await browser.newPage();
     // domcontentloadedが一番速い。他の設定値だと余計なファイルの読み込み待ちになるのかも
-    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    // await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.goto(url, { waitUntil: 'networkidle0' });
 
     // 最新の騰落レシオを取得
-    const elem = await page.$('.dtb1');
-    const ratioDate = await elem.evaluate(el => el.textContent);
-    const elem2 = await page.$('.dtb6');
-    const ratio = await elem2.evaluate(el => el.textContent)
-    console.log(ratioDate + ':' + ratio);
-    console.log(new Date(ratioDate) + ':' + Number(ratio));
+    // const elem = await page.$('.dtb1');
+    // const ratioDate = await elem.evaluate(el => el.textContent);
+    // const elem2 = await page.$('.dtb6');
+    // const ratio = await elem2.evaluate(el => el.textContent)
+    // console.log(ratioDate + ':' + ratio);
+    // console.log(new Date(ratioDate) + ':' + Number(ratio));
 
+    await page.setCacheEnabled(false);
+    await page.reload({ waitUntil: 'networkidle0' });
+
+    const elems = await page.$$('td.dtb1');
+    let ratioDate;
+    for (let i = 0; i < elems.length; i++) {
+      ratioDate = await elems[i].evaluate(el => el.textContent);
+      console.log(ratioDate);
+    }
+
+    await page.close();
     await browser.close();
 
-    response.send(ratioDate + ': ' + ratio);
+    // response.send(ratioDate + ': ' + ratio);
+    response.send(ratioDate);
   })();
 });
 
@@ -269,8 +291,7 @@ function sendMail(to, subject, content) {
     subject: subject,
     text: text
   }).then(() => {
-    console.log('メール送信OK to:' + to + ' subject:' + subject);
-  }).catch((error) => {
+  }).catch((eror) => {
     console.error(error);
   });
 }

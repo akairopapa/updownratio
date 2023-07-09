@@ -18,7 +18,7 @@
     "cheerio-httpcli": "^0.8.3",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^4.4.1",
-    "puppeteer": "^20.7.4"
+    "puppeteer": "^20.8.0"
   },
   "devDependencies": {
     "firebase-functions-test": "^0.2.0"

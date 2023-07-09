@@ -10,8 +10,7 @@
   "functions": {
     "source": "functions",
     "ignore": [
-      ".cache",
-      "node_modules"
+      ".cache"
     ]
   },
   "firestore": {
