@@ -291,6 +291,7 @@ function sendMail(to, subject, content) {
     subject: subject,
     text: text
   }).then(() => {
+    console.log('メール送信OK to:' + to + ' subject:' + subject);
   }).catch((eror) => {
     console.error(error);
   });
