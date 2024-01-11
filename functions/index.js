@@ -3,8 +3,8 @@ const admin = require('firebase-admin');
 admin.initializeApp();
 const db = admin.firestore();
 
-// スケジュール設定で毎日17:15に定期実行
-exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').runWith({ memory: '1GB' }).pubsub.schedule('15 17 * * *').timeZone('Asia/Tokyo').onRun(async (context) => {
+// スケジュール設定で毎日18:15に定期実行
+exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').runWith({ memory: '1GB' }).pubsub.schedule('15 18 * * *').timeZone('Asia/Tokyo').onRun(async (context) => {
   const puppeteer = require('puppeteer');
 
   const browser = await puppeteer.launch({
@@ -62,9 +62,9 @@ async function setRatioToFS(ratioDate, ratio) {
   );
 }
 
-// スケジュール設定で毎日17:30に定期実行
+// スケジュール設定で毎日18:30に定期実行
 exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['SENDGRID_API_KEY'] })
-  .pubsub.schedule('30 17 * * *').timeZone('Asia/Tokyo').onRun((context) => {
+  .pubsub.schedule('30 18 * * *').timeZone('Asia/Tokyo').onRun((context) => {
     Promise.all([
       getLatestRatiosFromFS(),
       getUserSettingsFromFS()
