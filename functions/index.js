@@ -4,29 +4,30 @@ admin.initializeApp();
 const db = admin.firestore();
 
 // スケジュール設定で毎日17:15に定期実行
-exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').pubsub.schedule('15 17 * * *').timeZone('Asia/Tokyo').onRun((context) => {
-  const client = require('cheerio-httpcli');
-  const url = 'https://nikkeiyosoku.com/up_down_ratio/';
+exports.getRatioFromSiteAndSet = functions.region('asia-northeast1').runWith({ memory: '1GB' }).pubsub.schedule('15 17 * * *').timeZone('Asia/Tokyo').onRun(async (context) => {
+  const puppeteer = require('puppeteer');
 
-  client.fetch(url, function (err, $, res) {
-    if (err) {
-      console.error(err);
-    }
-
-    // 最新の騰落レシオを取得
-    let ratioDate;
-    let ratio;
-    $('td').each(function (i, e) {
-      if (i === 39) {
-        ratioDate = new Date($(e).text());
-      }
-      if (i === 43) {
-        ratio = Number($(e).text());
-      }
-    });
-
-    setRatioToFS(ratioDate, ratio);
+  const browser = await puppeteer.launch({
+    headless: 'new'
   });
+
+  const page = await browser.newPage();
+  const url = 'https://nikkei225jp.com/data/touraku.php';
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+
+  // 騰落レシオ日
+  const ratioDateElem = await page.$('#datatbl > tr:nth-child(3) > td.dtb1 > time');
+  const ratioDateStr = await ratioDateElem.evaluate(el => el.textContent);
+  const ratioDate = new Date(ratioDateStr);
+  // 騰落レシオ
+  const ratioElem = await page.$('#datatbl > tr:nth-child(3) > td:nth-child(7)');
+  const ratioStr = await ratioElem.evaluate(el => el.textContent);
+  const ratio = Number(ratioStr);
+  console.log(ratioDateStr + ':' + ratioStr);
+
+  await browser.close();
+
+  setRatioToFS(ratioDate, ratio);
 });
 
 exports.setRatio = functions.region('asia-northeast1').https.onRequest((request, response) => {
@@ -36,7 +37,7 @@ exports.setRatio = functions.region('asia-northeast1').https.onRequest((request,
   const ratio = Number(request.query.ratio);
 
   setRatioToFS(ratioDate, ratio);
-  response.send(ratioDate + ': ' + ratio);
+  response.send(ratioDate + ':' + ratio);
 });
 
 async function setRatioToFS(ratioDate, ratio) {
@@ -52,8 +53,8 @@ async function setRatioToFS(ratioDate, ratio) {
       getLatestRatiosFromFS().then(
         latestRatios => {
           docRef.update({
-            // 騰落レシオの前日比（誤差がでるので小数点第一位で四捨五入）
-            diffRatio: Math.round((latestRatios.get('latestRatio') - latestRatios.get('prevRatio')) * 10) / 10
+            // 騰落レシオの前日比（誤差がでるので小数点第二位で四捨五入）
+            diffRatio: Math.round((latestRatios.get('latestRatio') - latestRatios.get('prevRatio')) * 100) / 100
           })
         }
       )
@@ -141,6 +142,7 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['S
         }
       }
     );
+    return null;
   });
 
 exports.notifyRegistration = functions.region('asia-northeast1').runWith({ secrets: ['SENDGRID_API_KEY'] })
