@@ -67,3 +67,6 @@ node_modules/
 
 # Firestoreのエミュレータのデータ
 data
+
+# Macの隠しファイル
+.DS_Store

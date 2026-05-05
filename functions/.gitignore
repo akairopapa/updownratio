@@ -1,4 +1,10 @@
 node_modules/
 
+# Macの隠しファイル
+.DS_Store
+
 # Puppeteerのキャッシュ
-.cache/
+.cache
+
+# テストソース
+test*
