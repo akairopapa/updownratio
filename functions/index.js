@@ -219,7 +219,7 @@ async function sendMail(to, subject, content) {
       text: text,
     });
 
-    console.log(`メール送信OK: id=${data.id} to=${msg.to} subject=${msg.subject}`);
+    console.log(`メール送信OK: to=${to} subject=${subject}`);
   } catch (error) {
     console.error('メール送信エラー:', error);
   }
