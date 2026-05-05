@@ -14,10 +14,10 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@sendgrid/mail": "^8.1.0",
     "firebase-admin": "^11.11.1",
     "firebase-functions": "^7.2.5",
-    "puppeteer": "^21.7.0"
+    "puppeteer": "^21.7.0",
+    "resend": "^6.12.2"
   },
   "devDependencies": {
     "firebase-functions-test": "^3.1.0"

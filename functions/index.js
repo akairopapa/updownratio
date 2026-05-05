@@ -63,7 +63,7 @@ async function setRatioToFS(ratioDate, ratio) {
 }
 
 // スケジュール設定で毎日19:30に定期実行
-exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['SENDGRID_API_KEY'] })
+exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['RESEND_API_KEY', 'UPDOWNRATIO_NOTIFICATION_EMAIL'] })
   .pubsub.schedule('30 19 * * *').timeZone('Asia/Tokyo').onRun((context) => {
     Promise.all([
       getLatestRatiosFromFS(),
@@ -145,7 +145,7 @@ exports.notifyUsers = functions.region('asia-northeast1').runWith({ secrets: ['S
     return null;
   });
 
-exports.notifyRegistration = functions.region('asia-northeast1').runWith({ secrets: ['SENDGRID_API_KEY'] })
+exports.notifyRegistration = functions.region('asia-northeast1').runWith({ secrets: ['RESEND_API_KEY', 'UPDOWNRATIO_NOTIFICATION_EMAIL'] })
   .https.onCall((data, context) => {
     const subject = 'ユーザー登録完了のお知らせ';
     const content =
@@ -200,26 +200,27 @@ function notifyUser(docId, subject, content) {
   });
 }
 
-function sendMail(to, subject, content) {
-  const sgMail = require('@sendgrid/mail');
-  // SendGridのAPIキー（シークレットから取得）
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+async function sendMail(to, subject, content) {
+  const { Resend } = require('resend');
+  // ResendのAPIキー（シークレットから取得）
+  const resend = new Resend(process.env.RESEND_API_KEY);
 
   const text = content
     + '\n'
     + '〜 騰落レシオ通知 〜\n'
     + '通知設定の変更、通知メールの配信停止等はこちらから\n'
-    + 'https://updownratio.web.app/\n'
-    + '';
+    + 'https://updownratio.web.app/\n';
 
-  sgMail.send({
-    from: '"騰落レシオ通知" <noreply@updownratio.web.app>',
-    to: to,
-    subject: subject,
-    text: text
-  }).then(() => {
-    console.log('メール送信OK to:' + to + ' subject:' + subject);
-  }).catch((error) => {
-    console.error(error);
-  });
+  try {
+    const data = await resend.emails.send({
+      from: `騰落レシオ通知 <${process.env.UPDOWNRATIO_NOTIFICATION_EMAIL}>`,
+      to: to,
+      subject: subject,
+      text: text,
+    });
+
+    console.log(`メール送信OK: id=${data.id} to=${msg.to} subject=${msg.subject}`);
+  } catch (error) {
+    console.error('メール送信エラー:', error);
+  }
 }
